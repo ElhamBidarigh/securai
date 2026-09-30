@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SecurAI — Security Audit for AI-Built Apps</title>
+<meta name="description" content="Run a 31-point security audit on your AI-built web app in under 5 minutes. Get a risk score and actionable fixes. Runs entirely in your browser." />
+<style>
+  :root{
+    --bg:#070b14;
+    --bg-2:#0a0f1c;
+    --surface:#0f1626;
+    --surface-2:#141d30;
+    --border:#1f2b45;
+    --border-2:#2a3854;
+    --text:#e6edf7;
+    --muted:#8b9bb4;
+    --muted-2:#5d6b85;
+    --accent:#10b981;
+    --accent-2:#06b6d4;
+    --danger:#ef4444;
+    --warn:#f59e0b;
+    --info:#3b82f6;
+    --radius:14px;
+    --radius-sm:10px;
+    --shadow:0 10px 40px -12px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-1;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(16,185,129,.10), transparent 60%),
+      radial-gradient(1000px 500px at 90% 0%, rgba(6,182,212,.08), transparent 60%);
+    pointer-events:none;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select,textarea{font-family:inherit}
+
+  /* ---------- Layout ---------- */
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(7,11,20,.75);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.2px}
+  .logo-mark{
+    width:30px;height:30px;border-radius:9px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;color:#04121a;font-weight:900;font-size:15px;
+    box-shadow:0 0 24px -4px rgba(16,185,129,.5);
+  }
+  .nav-actions{display:flex;align-items:center;gap:10px}
+  .ghost-btn{
+    padding:8px 14px;border-radius:9px;font-size:13.5px;font-weight:500;
+    color:var(--muted);transition:.18s;
+  }
+  .ghost-btn:hover{color:var(--text);background:var(--surface)}
+  .pro-btn{
+    padding:8px 16px;border-radius:9px;font-size:13.5px;font-weight:600;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#04121a;transition:.18s;box-shadow:0 4px 18px -6px rgba(16,185,129,.6);
+  }
+  .pro-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px -6px rgba(16,185,129,.8)}
+  .pro-badge{
+    display:none;padding:5px 10px;border-radius:99px;font-size:11px;font-weight:700;
+    background:rgba(16,185,129,.14);color:var(--accent);border:1px solid rgba(16,185,129,.3);
+    letter-spacing:.4px;
+  }
+  body.is-pro .pro-badge{display:inline-block}
+  body.is-pro .pro-btn{display:none}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:70px 0 40px;text-align:center}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 14px;border-radius:99px;font-size:12.5px;font-weight:500;
+    background:var(--surface);border:1px solid var(--border);color:var(--muted);
+    margin-bottom:22px;
+  }
+  .pill-dot{width:7px;height:7px;border-radius:99px;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+  h1{
+    font-size:clamp(30px,5.2vw,50px);font-weight:800;letter-spacing:-1.4px;
+    line-height:1.1;margin-bottom:18px;
+  }
+  h1 .grad{
+    background:linear-gradient(120deg,var(--accent),var(--accent-2) 60%,#818cf8);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p{max-width:640px;margin:0 auto 30px;color:var(--muted);font-size:16.5px}
+  .hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:34px}
+  .btn-primary{
+    padding:13px 26px;border-radius:11px;font-size:14.5px;font-weight:600;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#04121a;transition:.18s;
+    box-shadow:0 8px 26px -8px rgba(16,185,129,.7);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px -8px rgba(16,185,129,.9)}
+  .btn-secondary{
+    padding:13px 24px;border-radius:11px;font-size:14.5px;font-weight:500;
+    background:var(--surface);border:1px solid var(--border);color:var(--text);transition:.18s;
+  }
+  .btn-secondary:hover{border-color:var(--border-2);background:var(--surface-2)}
+
+  /* trust bar */
+  .trust{
+    display:flex;justify-content:center;gap:28px;flex-wrap:wrap;
+    padding:20px 0 0;font-size:13px;color:var(--muted-2);
+  }
+  .trust div{display:flex;align-items:center;gap:7px}
+  .trust svg{width:15px;height:15px;color:var(--accent)}
+
+  /* ---------- Stats strip ---------- */
+  .stats{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:14px;margin:44px 0 20px;
+  }
+  .stat{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:18px 20px;
+  }
+  .stat-num{font-size:26px;font-weight:800;letter-spacing:-.8px;
+    background:linear-gradient(120deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat-lbl{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+  /* ---------- Assessment ---------- */
+  #assessment{padding:20px 0 60px}
+  .a-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+  .a-head h2{font-size:22px;font-weight:700;letter-spacing:-.5px}
+  .a-head p{color:var(--muted);font-size:14px;margin-top:4px}
+  .quota{font-size:12.5px;color:var(--muted);background:var(--surface);
+    padding:7px 13px;border-radius:99px;border:1px solid var(--border)}
+  .quota b{color:var(--accent)}
+
+  /* tabs */
+  .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;margin-bottom:22px;
+    scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:9px 15px;border-radius:10px;font-size:13px;font-weight:500;
+    background:var(--surface);border:1px solid var(--border);color:var(--muted);
+    transition:.18s;white-space:nowrap;
+  }
+  .tab:hover{border-color:var(--border-2);color:var(--text)}
+  .tab.active{background:var(--surface-2);border-color:var(--accent);color:var(--text);
+    box-shadow:0 0 0 1px rgba(16,185,129,.3) inset}
+  .tab .tab-dot{width:6px;height:6px;border-radius:99px;background:var(--border-2)}
+  .tab.done .tab-dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .tab-idx{font-size:11px;color:var(--muted-2);font-variant-numeric:tabular-nums}
+
+  /* progress */
+  .progress-wrap{margin-bottom:22px}
+  .progress-meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:8px}
+  .progress-track{height:6px;background:var(--surface);border-radius:99px;overflow:hidden;border:1px solid var(--border)}
+  .progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+  /* check card */
+  .check{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:20px 22px;margin-bottom:12px;
+    transition:.2s;
+  }
+  .check:hover{border-color:var(--border-2)}
+  .check.answered-yes{border-left:3px solid var(--accent)}
+  .check.answered-no{border-left:3px solid var(--danger)}
+  .check.answered-na{border-left:3px solid var(--muted-2)}
+  .check-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}
+  .check-q{font-size:15px;font-weight:600;letter-spacing:-.2px;line-height:1.45}
+  .check-desc{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.6}
+  .sev{
+    flex:0 0 auto;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:700;
+    letter-spacing:.5px;text-transform:uppercase;
+  }
+  .sev-critical{background:rgba(239,68,68,.14);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+  .sev-high{background:rgba(245,158,11,.14);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+  .sev-medium{background:rgba(59,130,246,.14);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+
+  .answers{display:flex;gap:8px;flex-wrap:wrap}
+  .ans{
+    padding:8px 16px;border-radius:9px;font-size:13px;font-weight:600;
+    background:var(--bg-2);border:1px solid var(--border);color:var(--muted);
+    transition:.15s;min-width:64px;
+  }
+  .ans:hover{border-color:var(--border-2);color:var(--text)}
+  .ans.on-yes{background:rgba(16,185,129,.16);border-color:var(--accent);color:#34d399}
+  .ans.on-no{background:rgba(239,68,68,.14);border-color:var(--danger);color:#f87171}
+  .ans.on-na{background:rgba(93,107,133,.18);border-color:var(--muted-2);color:#94a3b8}
+
+  .nav-row{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
+
+  /* ---------- Results ---------- */
+  #results{padding:40px 0 80px;display:none}
+  #results.show{display:block;animation:fadeUp .5s cubic-bezier(.4,0,.2,1)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  .report-head{
+    display:grid;grid-template-columns:auto 1fr;gap:34px;align-items:center;
+    background:linear-gradient(160deg,var(--surface),var(--bg-2));
+    border:1px solid var(--border);border-radius:20px;padding:34px;margin-bottom:26px;
+  }
+  @media(max-width:720px){.report-head{grid-template-columns:1fr;gap:24px;text-align:center}}
+  .gauge{position:relative;width:170px;height:170px;flex:0 0 auto;margin:0 auto}
+  .gauge svg{transform:rotate(-90deg)}
+  .gauge-track{stroke:var(--border);fill:none;stroke-width:12}
+  .gauge-fill{fill:none;stroke-width:12;stroke-linecap:round;
+    stroke-dasharray:439.8;stroke-dashoffset:439.8;
+    transition:stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1)}
+  .gauge-num{
+    position:absolute;inset:0;display:grid;place-items:center;flex-direction:column;
+  }
+  .gauge-num span:first-child{font-size:44px;font-weight:800;letter-spacing:-2px;line-height:1}
+  .gauge-num span:last-child{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.5px;text-transform:uppercase}
+
+  .report-meta h2{font-size:26px;font-weight:800;letter-spacing:-.7px;margin-bottom:8px}
+  .report-meta p{color:var(--muted);font-size:14.5px;margin-bottom:16px}
+  .risk-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 16px;border-radius:99px;font-size:13px;font-weight:700;
+    margin-bottom:16px;
+  }
+  .risk-excellent{background:rgba(16,185,129,.14);color:#34d399;border:1px solid rgba(16,185,129,.35)}
+  .risk-good{background:rgba(6,182,212,.14);color:#22d3ee;border:1px solid rgba(6,182,212,.35)}
+  .risk-warn{background:rgba(245,158,11,.14);color:#fbbf24;border:1px solid rgba(245,158,11,.35)}
+  .risk-critical{background:rgba(239,68,68,.14);color:#f87171;border:1px solid rgba(239,68,68,.35)}
+
+  .report-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+  /* category breakdown */
+  .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:34px}
+  .cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+  .cat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .cat-name{font-size:14px;font-weight:600}
+  .cat-score{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+  .cat-bar{height:6px;background:var(--bg-2);border-radius:99px;overflow:hidden;border:1px solid var(--border)}
+  .cat-bar span{display:block;height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+  /* findings */
+  .section-title{font-size:18px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+  .section-sub{color:var(--muted);font-size:13.5px;margin-bottom:20px}
+
+  .finding{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);margin-bottom:14px;overflow:hidden;
+    border-left:3px solid var(--danger);
+  }
+  .finding.medium{border-left-color:var(--warn)}
+  .finding.low{border-left-color:var(--info)}
+  .finding-head{padding:18px 22px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;cursor:pointer}
+  .finding-head:hover{background:var(--surface-2)}
+  .finding-title{font-size:14.5px;font-weight:600;line-height:1.5}
+  .finding-meta{display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap}
+  .finding-cat{font-size:11.5px;color:var(--muted-2)}
+  .chev{flex:0 0 auto;color:var(--muted);transition:.25s;margin-top:3px}
+  .finding.open .chev{transform:rotate(180deg)}
+  .finding-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+  .finding.open .finding-body{max-height:900px}
+  .finding-inner{padding:0 22px 22px;border-top:1px solid var(--border);padding-top:18px}
+  .finding-inner h4{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px;font-weight:700}
+  .finding-inner p{font-size:13.8px;color:var(--text);margin-bottom:16px;line-height:1.7}
+  .finding-inner code{
+    display:block;background:var(--bg);border:1px solid var(--border);border-radius:8px;
+    padding:12px 14px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12.5px;
+    color:#a5f3d0;overflow-x:auto;white-space:pre;line-height:1.6;margin-bottom:16px;
+  }
+  .finding-inner a{color:var(--accent-2);font-size:13px;text-decoration:underline}
+
+  .perfect{
+    background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.25);
+    border-radius:var(--radius);padding:24px;text-align:center;color:#34d399;
+    font-size:14.5px;font-weight:500;
+  }
+
+  /* pro modal */
+  .modal-bg{
+    position:fixed;inset:0;z-index:100;background:rgba(3,6,12,.82);
+    backdrop-filter:blur(6px);display:none;place-items:center;padding:20px;
+    overflow-y:auto;
+  }
+  .modal-bg.show{display:grid;animation:fadeIn .2s}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:var(--surface);border:1px solid var(--border);border-radius:20px;
+    padding:36px;max-width:780px;width:100%;position:relative;
+    box-shadow:var(--shadow);animation:fadeUp .3s;
+  }
+  .modal-close{position:absolute;top:18px;right:18px;width:32px;height:32px;
+    border-radius:8px;display:grid;place-items:center;color:var(--muted);font-size:20px}
+  .modal-close:hover{background:var(--surface-2);color:var(--text)}
+  .modal h3{font-size:24px;font-weight:800;letter-spacing:-.6px;margin-bottom:8px}
+  .modal > p{color:var(--muted);font-size:14px;margin-bottom:26px}
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.plans{grid-template-columns:1fr}}
+  .plan{background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:24px;position:relative}
+  .plan.featured{border-color:var(--accent);box-shadow:0 0 0 1px rgba(16,185,129,.3) inset,0 10px 30px -12px rgba(16,185,129,.4)}
+  .plan-tag{position:absolute;top:-10px;left:24px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#04121a;font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:99px;letter-spacing:.5px}
+  .plan h4{font-size:15px;font-weight:700;margin-bottom:4px}
+  .plan-price{font-size:32px;font-weight:800;letter-spacing:-1.5px;margin:10px 0 4px}
+  .plan-price small{font-size:14px;font-weight:500;color:var(--muted);letter-spacing:0}
+  .plan ul{list-style:none;margin:18px 0 22px;display:flex;flex-direction:column;gap:10px}
+  .plan li{font-size:13.5px;color:var(--muted);display:flex;gap:9px;align-items:flex-start}
+  .plan li svg{flex:0 0 auto;width:15px;height:15px;color:var(--accent);margin-top:3px}
+  .plan button{width:100%;padding:11px;border-radius:10px;font-size:13.5px;font-weight:600;transition:.18s}
+  .plan .buy{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#04121a}
+  .plan .buy:hover{transform:translateY(-1px)}
+  .plan .soon{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+  .plan .soon:hover{border-color:var(--border-2);color:var(--text)}
+
+  /* toast */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+    padding:12px 20px;border-radius:11px;font-size:13.5px;z-index:200;
+    box-shadow:var(--shadow);opacity:0;transition:.3s;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  footer{border-top:1px solid var(--border);padding:30px 0;margin-top:40px;
+    text-align:center;color:var(--muted-2);font-size:13px}
+  footer a{color:var(--muted)}
+  footer a:hover{color:var(--accent)}
+
+  /* print */
+  @media print{
+    body{background:#fff;color:#000}
+    header,.hero,.tabs,.progress-wrap,.nav-row,.report-actions,.modal-bg,footer,.trust,.stats{display:none!important}
+    .check{display:none!important}
+    #assessment{display:none!important}
+    #results{display:block!important}
+    .report-head,.cat-card,.finding{background:#fff!important;border:1px solid #ddd!important;
+      box-shadow:none!important;break-inside:avoid}
+    .finding-body{max-height:none!important;display:block!important}
+    .finding-inner{color:#000}
+    .finding-inner code{background:#f5f5f5;color:#000;border:1px solid #ddd}
+    .gauge-num span:first-child{color:#000!important}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo">
+      <div class="logo-mark">S</div>
+      <span>SecurAI</span>
+    </div>
+    <div class="nav-actions">
+      <span class="pro-badge">PRO</span>
+      <button class="ghost-btn" onclick="scrollToId('assessment')">Audit</button>
+      <button class="ghost-btn" onclick="openPro()">Pricing</button>
+      <button class="pro-btn" onclick="openPro()">Upgrade to Pro</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="hero">
+    <div class="pill"><span class="pill-dot"></span> Runs 100% in your browser · No signup required</div>
+    <h1>Is your <span class="grad">AI-built app</span><br/>actually safe to ship?</h1>
+    <p>Run a 31-point security audit in under 5 minutes. Get a risk score, prioritized findings, and copy-paste fixes — before a hacker finds them for you.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="startAudit()">Start Free Audit →</button>
+      <button class="btn-secondary" onclick="openPro()">See Pricing</button>
+    </div>
+    <div class="trust">
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+        No data leaves your device
+      </div>
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+        OWASP-aligned checks
+      </div>
+      <div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        Report in ~4 minutes
+      </div>
+    </div>
+  </section>
+
+  <!-- stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-num">31</div><div class="stat-lbl">Security checks</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">Risk categories</div></div>
+    <div class="stat"><div class="stat-num">2026</div><div class="stat-lbl">AI-threat coverage</div></div>
+    <div class="stat"><div class="stat-num">0$</div><div class="stat-lbl">To start</div></div>
+  </div>
+
+  <!-- ================= ASSESSMENT ================= -->
+  <section id="assessment">
+    <div class="a-head">
+      <div>
+        <h2>Security Audit</h2>
+        <p>Answer each check honestly. Your report is generated locally.</p>
+      </div>
+      <div class="quota" id="quota">Free scans left today: <b>—</b></div>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="progressLabel">0 of 31 answered</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+
+    <div id="checks"></div>
+
+    <div class="nav-row">
+      <button class="btn-secondary" id="prevCat" onclick="navCat(-1)">← Previous</button>
+      <button class="btn-primary" id="nextCat" onclick="navCat(1)">Next →</button>
+    </div>
+  </section>
+
+  <!-- ================= RESULTS ================= -->
+  <section id="results">
+    <div class="report-head">
+      <div class="gauge">
+        <svg width="170" height="170" viewBox="0 0 170 170">
+          <circle class="gauge-track" cx="85" cy="85" r="70"/>
+          <circle class="gauge-fill" id="gaugeFill" cx="85" cy="85" r="70"/>
+        </svg>
+        <div class="gauge-num">
+          <span id="scoreNum">0</span>
+          <span>Risk Score</span>
+        </div>
+      </div>
+      <div class="report-meta">
+        <div class="risk-badge" id="riskBadge">—</div>
+        <h2 id="reportTitle">Your Security Report</h2>
+        <p id="reportSub">—</p>
+        <div class="report-actions">
+          <button class="btn-primary" onclick="window.print()">Download PDF</button>
+          <button class="btn-secondary" onclick="copySummary()">Copy Summary</button>
+          <button class="btn-secondary" onclick="resetAll()">New Audit</button>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="section-title">Category Breakdown</h3>
+    <p class="section-sub">Where you're strong, where you're exposed.</p>
+    <div class="cat-grid" id="catGrid"></div>
+
+    <h3 class="section-title" id="findingsTitle">Findings & Fixes</h3>
+    <p class="section-sub" id="findingsSub">Click any finding to see the exact remediation.</p>
+    <div id="findings"></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    SecurAI · Built for indie hackers shipping AI-powered apps ·
+    <a href="#" onclick="openPro();return false">Upgrade to Pro</a>
+  </div>
+</footer>
+
+<!-- ================= PRO MODAL ================= -->
+<div class="modal-bg" id="proModal" onclick="if(event.target===this)closePro()">
+  <div class="modal">
+    <button class="modal-close" onclick="closePro()">×</button>
+    <h3>Ship with confidence</h3>
+    <p>Free plan: 5 audits per day. Upgrade for unlimited audits, PDF exports, and CI integration.</p>
+    <div class="plans">
+      <div class="plan">
+        <h4>Starter</h4>
+        <div class="plan-price">$9<small>/mo</small></div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> Unlimited audits</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> PDF export</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> Save & compare reports</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> Email support</li>
+        </ul>
+        <button class="soon" onclick="mockUnlock('starter')">Coming soon</button>
+      </div>
+      <div class="plan featured">
+        <span class="plan-tag">MOST POPULAR</span>
+        <h4>Pro</h4>
+        <div class="plan-price">$19<small>/mo</small></div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> Everything in Starter</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> GitHub Action (CI scan on every PR)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> AI-specific deep checks (prompt injection, RAG)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> Priority support</li>
+        </ul>
+        <button class="buy" onclick="mockUnlock('pro')">Upgrade — $19/mo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DATA — 31 security checks across 6 categories
+   ============================================================ */
+const CATEGORIES = [
+  {
+    id:'secrets', name:'Secrets & Credentials', icon:'🔑',
+    checks:[
+      {id:'s1', w:10, q:'No API keys or secrets are hardcoded in source code',
+       d:'Hardcoded keys in your repo will be scraped by bots within minutes of going public.',
+       fix:'Move every secret into environment variables. Never commit .env files.',
+       code:'// ❌ Bad\nconst key = "sk-proj-abc123..."\n\n// ✅ Good\nconst key = process.env.OPENAI_API_KEY',
+       ref:'https://owasp.org/www-project-top-ten/'},
+      {id:'s2', w:9, q:'All secrets are loaded from environment variables or a secret manager',
+       d:'Centralized secret management prevents leaks and makes rotation possible.',
+       fix:'Use .env locally and a secret manager (Vercel Env, AWS Secrets Manager, Doppler) in production.'},
+      {id:'s3', w:10, q:'No secrets are exposed in client-side JavaScript bundles',
+       d:'Anything in a client bundle is public. Check your built assets for keys.',
+       fix:'Never prefix secrets with NEXT_PUBLIC_ or VITE_. Only public config belongs on the client.',
+       code:'# Scan your build for leaks\ngrep -rE "sk-[a-zA-Z0-9]{20,}" ./dist ./build ./.next'},
+      {id:'s4', w:6, q:'API keys and tokens are rotated on a regular schedule',
+       d:'Rotation limits the blast radius if a key leaks.',
+       fix:'Rotate keys every 90 days. Automate it in your CI so it actually happens.'},
+      {id:'s5', w:9, q:'.env and secret files are excluded from version control',
+       d:'A single committed .env file can leak every credential you own.',
+       fix:'Add to .gitignore: .env, .env.*, *.pem, *.key, secrets/.',
+       code:'.env\n.env.*\n!.env.example\n*.pem\n*.key\nsecrets/'},
+      {id:'s6', w:7, q:'Git history has been scanned and contains no leaked secrets',
+       d:'Deleting a file does not delete it from git history. Anyone can recover it.',
+       fix:'Run gitleaks or trufflehog on your repo. If you find a leak, rotate the key immediately and rewrite history with git-filter-repo.'}
+    ]
+  },
+  {
+    id:'auth', name:'Authentication & Authorization', icon:'🔐',
+    checks:[
+      {id:'a1', w:10, q:'Passwords are hashed with bcrypt, scrypt, or Argon2',
+       d:'Fast hashes (MD5, SHA-1, plain SHA-256) are trivially cracked on a GPU.',
+       fix:'Use bcrypt with cost ≥ 12, or Argon2id. Never store plaintext or reversible hashes.',
+       code:'const hash = await bcrypt.hash(password, 12);\nconst ok = await bcrypt.compare(input, hash);'},
+      {id:'a2', w:9, q:'Session cookies use HttpOnly, Secure, and SameSite flags',
+       d:'Without these flags, XSS can steal sessions and CSRF can hijack them.',
+       fix:'Set all three flags on every auth cookie.',
+       code:'res.cookie("session", token, {\n  httpOnly: true,\n  secure: true,\n  sameSite: "lax",\n  maxAge: 7*24*3600*1000\n});'},
+      {id:'a3', w:6, q:'Multi-factor authentication is available for admin accounts',
+       d:'MFA blocks 99% of automated account takeovers.',
+       fix:'Add TOTP (Google Authenticator) at minimum. Use Auth0, Clerk, or Supabase Auth to get it for free.'},
+      {id:'a4', w:8, q:'Login and signup endpoints are rate limited',
+       d:'Without rate limits, attackers can brute force passwords and enumerate users.',
+       fix:'Limit to ~5 attempts per IP per 15 minutes. Use express-rate-limit or your platform’s built-in limiter.',
+       code:'import rateLimit from "express-rate-limit";\napp.use("/api/login", rateLimit({\n  windowMs: 15*60*1000, max: 5\n}));'},
+      {id:'a5', w:9, q:'Authorization is enforced server-side with role checks',
+       d:'Client-side checks (hiding a button) are cosmetic. Anyone can call your API directly.',
+       fix:'Every protected endpoint must verify the user’s role/permissions from the session — never trust the client.'},
+      {id:'a6', w:8, q:'JWTs are validated with a fixed algorithm and verified signature',
+       d:'Accepting alg:none or using the wrong verification library lets attackers forge tokens.',
+       fix:'Always pass { algorithms: ["RS256"] } (or your chosen alg) to jwt.verify.',
+       code:'jwt.verify(token, publicKey, { algorithms: ["RS256"] });'}
+    ]
+  },
+  {
+    id:'input', name:'Input Validation & Injection', icon:'🧱',
+    checks:[
+      {id:'i1', w:9, q:'All user input is validated on the server',
+       d:'Client-side validation is a UX nicety, not a security control.',
+       fix:'Validate type, length, format, and range on the server. Use Zod, Joi, or Pydantic.'},
+      {id:'i2', w:10, q:'Database queries use parameterized statements or an ORM',
+       d:'String-concatenated SQL is the #1 cause of SQL injection.',
+       fix:'Use parameterized queries or an ORM. Never interpolate user input into SQL.',
+       code:'// ❌ Bad\n`SELECT * FROM users WHERE id = ${id}`\n\n// ✅ Good\ndb.query("SELECT * FROM users WHERE id = $1", [id]);'},
+      {id:'i3', w:9, q:'Output is encoded/escaped before rendering in HTML',
+       d:'Unescaped user content in HTML leads to stored XSS.',
+       fix:'Use your framework’s default escaping. Avoid dangerouslySetInnerHTML and v-html unless sanitized.',
+       code:'import DOMPurify from "dompurify";\n<div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(html)}} />'},
+      {id:'i4', w:7, q:'State-changing requests require CSRF protection',
+       d:'Without CSRF protection, a malicious site can submit forms as your logged-in user.',
+       fix:'Use SameSite=Lax/Strict cookies and a CSRF token (or double-submit cookie pattern).'},
+      {id:'i5', w:7, q:'File uploads are type-checked and stored outside the web root',
+       d:'Uploading a .php or .js file into a public directory can lead to remote code execution.',
+       fix:'Validate MIME type and extension. Store in S3/R2, never in /public. Serve via signed URLs.'}
+    ]
+  },
+  {
+    id:'ai', name:'AI-Specific Security', icon:'🤖',
+    checks:[
+      {id:'ai1', w:8, q:'Prompt injection defenses are in place for user-facing LLM features',
+       d:'User input can override your system prompt and hijack the model.',
+       fix:'Treat all model input as untrusted. Delimit user content, strip instructions, and validate outputs. Use a guardrail layer (Llama Guard, prompt-armor).',
+       ref:'https://owasp.org/www-project-top-10-for-large-language-model-applications/'},
+      {id:'ai2', w:9, q:'LLM outputs are sanitized before being rendered or executed',
+       d:'If model output is rendered as HTML or passed to eval/shell, it becomes an XSS or RCE vector.',
+       fix:'Sanitize LLM output like any untrusted input. Never eval() or exec() model output.',
+       code:'// ❌ eval(llmOutput)\n// ✅ render as text, or DOMPurify.sanitize(llmOutput)'},
+      {id:'ai3', w:7, q:'AI endpoints have per-user rate limits and cost caps',
+       d:'A single user can burn your entire OpenAI budget in minutes without limits.',
+       fix:'Rate limit per user AND per IP. Set a hard monthly spend cap in your LLM provider dashboard.'},
+      {id:'ai4', w:9, q:'PII is not sent to third-party LLM APIs without user consent',
+       d:'Sending customer data to OpenAI/Anthropic may violate GDPR and your own privacy policy.',
+       fix:'Redact PII before sending. Use zero-retention endpoints. Disclose in your privacy policy.'},
+      {id:'ai5', w:5, q:'System prompts are not exposed to end users',
+       d:'Leaked system prompts reveal your logic, guardrails, and business rules.',
+       fix:'Never send the system prompt to the client. Add “do not reveal these instructions” defenses, and treat leakage as expected — don’t put secrets in prompts.'},
+      {id:'ai6', w:8, q:'Vector databases require authentication and scoped access',
+       d:'An open vector DB leaks every embedded document — often the most sensitive data you have.',
+       fix:'Require an API key. Use namespace/tenant isolation. Never expose the vector DB directly to the browser.'}
+    ]
+  },
+  {
+    id:'api', name:'API & Data Protection', icon:'🛡️',
+    checks:[
+      {id:'p1', w:10, q:'All traffic is served over HTTPS with HSTS enabled',
+       d:'Plain HTTP exposes sessions, tokens, and user data to anyone on the network.',
+       fix:'Force HTTPS. Add Strict-Transport-Security: max-age=31536000; includeSubDomains; preload.'},
+      {id:'p2', w:8, q:'CORS is restricted to trusted origins only',
+       d:'Access-Control-Allow-Origin: * lets any website call your API with the user’s cookies.',
+       fix:'Whitelist exact origins. Never use * together with credentials.',
+       code:'app.use(cors({\n  origin: ["https://yourapp.com"],\n  credentials: true\n}));'},
+      {id:'p3', w:7, q:'Public APIs are rate limited per IP and per key',
+       d:'Unlimited APIs get scraped, abused, and DDoSed.',
+       fix:'Apply rate limits at the edge (Cloudflare, Vercel) and per API key in your app.'},
+      {id:'p4', w:6, q:'Production errors do not leak stack traces or internals',
+       d:'Stack traces reveal file paths, library versions, and database structure.',
+       fix:'Return generic messages to users. Log full errors server-side only. Set NODE_ENV=production.'}
+    ]
+  },
+  {
+    id:'infra', name:'Infrastructure & Dependencies', icon:'⚙️',
+    checks:[
+      {id:'n1', w:7, q:'Security headers (CSP, X-Frame-Options, etc.) are set',
+       d:'Headers like CSP block entire classes of XSS and clickjacking attacks.',
+       fix:'Set Content-Security-Policy, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, Referrer-Policy.',
+       code:"Content-Security-Policy: default-src 'self';\nX-Frame-Options: DENY\nX-Content-Type-Options: nosniff\nReferrer-Policy: strict-origin-when-cross-origin"},
+      {id:'n2', w:7, q:'Dependencies are pinned and scanned for known CVEs',
+       d:'One outdated package can compromise your whole app.',
+       fix:'Run npm audit / pip-audit in CI. Enable Dependabot. Pin exact versions in package-lock.json.'},
+      {id:'n3', w:7, q:'Database users follow least-privilege principle',
+       d:'An app DB user with DROP/GRANT rights turns one bug into total data loss.',
+       fix:'Grant only SELECT/INSERT/UPDATE/DELETE on the tables the app needs. Never use the root/admin user.'},
+      {id:'n4', w:6, q:'Backups are encrypted and restoration is tested',
+       d:'An untested backup is not a backup. An unencrypted one is a liability.',
+       fix:'Enable encrypted automated backups. Restore to a staging DB once a month to verify.'}
+    ]
+  }
+];
+
+/* flatten */
+const ALL_CHECKS = CATEGORIES.flatMap(c => c.checks.map(ch => ({...ch, cat:c.id, catName:c.name})));
+const TOTAL = ALL_CHECKS.length;
+const FREE_LIMIT = 5;
+const STORE_KEY = 'securai_v1';
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let state = { answers:{}, currentCat:0 };
+let store = loadStore();
+
+function loadStore(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    const today = new Date().toISOString().slice(0,10);
+    if(raw.date !== today) return { date:today, count:0, pro:false };
+    return { date:today, count:raw.count||0, pro:!!raw.pro };
+  }catch(e){ return { date:new Date().toISOString().slice(0,10), count:0, pro:false }; }
+}
+function saveStore(){ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }
+function scansLeft(){ return store.pro ? Infinity : Math.max(0, FREE_LIMIT - store.count); }
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderTabs(){
+  const el = document.getElementById('tabs');
+  el.innerHTML = CATEGORIES.map((c,i)=>{
+    const answered = c.checks.every(ch => state.answers[ch.id]);
+    return `<button class="tab ${i===state.currentCat?'active':''} ${answered?'done':''}" onclick="goCat(${i})">
+      <span class="tab-dot"></span>${c.icon} ${c.name}
+    </button>`;
+  }).join('');
+}
+
+function renderChecks(){
+  const cat = CATEGORIES[state.currentCat];
+  const el = document.getElementById('checks');
+  el.innerHTML = cat.checks.map(ch=>{
+    const ans = state.answers[ch.id];
+    const sev = ch.w >= 8 ? 'critical' : ch.w >= 6 ? 'high' : 'medium';
+    return `<div class="check ${ans?'answered-'+ans:''}" data-id="${ch.id}">
+      <div class="check-top">
+        <div>
+          <div class="check-q">${ch.q}</div>
+          <div class="check-desc">${ch.d}</div>
+        </div>
+        <span class="sev sev-${sev}">${sev}</span>
+      </div>
+      <div class="answers">
+        <button class="ans ${ans==='yes'?'on-yes':''}" onclick="answer('${ch.id}','yes')">Yes</button>
+        <button class="ans ${ans==='no'?'on-no':''}" onclick="answer('${ch.id}','no')">No</button>
+        <button class="ans ${ans==='na'?'on-na':''}" onclick="answer('${ch.id}','na')">N/A</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateProgress();
+}
+
+function updateProgress(){
+  const answered = Object.keys(state.answers).length;
+  const pct = Math.round(answered / TOTAL * 100);
+  document.getElementById('progressLabel').textContent = `${answered} of ${TOTAL} answered`;
+  document.getElementById('progressPct').textContent = `${pct}%`;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('prevCat').style.visibility = state.currentCat === 0 ? 'hidden' : 'visible';
+  const last = state.currentCat === CATEGORIES.length - 1;
+  const btn = document.getElementById('nextCat');
+  btn.textContent = last ? 'Generate Report →' : 'Next →';
+  btn.onclick = last ? generateReport : () => navCat(1);
+  document.getElementById('quota').innerHTML = store.pro
+    ? 'PRO · <b>Unlimited</b> scans'
+    : `Free scans left today: <b>${scansLeft()}</b>`;
+}
+
+function answer(id, val){
+  state.answers[id] = val;
+  const card = document.querySelector(`[data-id="${id}"]`);
+  card.classList.remove('answered-yes','answered-no','answered-na');
+  card.classList.add('answered-'+val);
+  card.querySelectorAll('.ans').forEach(b=>b.classList.remove('on-yes','on-no','on-na'));
+  card.querySelector('.ans.'+ (val==='yes'?'on-yes':val==='no'?'on-no':'on-na'));
+  card.querySelectorAll('.ans').forEach(b=>{
+    if(b.textContent.trim().toLowerCase() === (val==='na'?'n/a':val)) b.classList.add('on-'+val);
+  });
+  renderTabs();
+  updateProgress();
+}
+
+function goCat(i){ state.currentCat = i; renderTabs(); renderChecks(); }
+function navCat(d){ const n = state.currentCat + d; if(n>=0 && n<CATEGORIES.length) goCat(n); }
+function startAudit(){ scrollToId('assessment'); }
+function scrollToId(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+
+/* ============================================================
+   SCORING
+   ============================================================ */
+function computeScore(){
+  let earned = 0, possible = 0;
+  const perCat = {};
+  CATEGORIES.forEach(cat=>{
+    let e=0, p=0;
+    cat.checks.forEach(ch=>{
+      const a = state.answers[ch.id];
+      if(a === 'na') return;
+      p += ch.w;
+      if(a === 'yes') e += ch.w;
+    });
+    perCat[cat.id] = { earned:e, possible:p, score: p ? Math.round(e/p*100) : 100 };
+    earned += e; possible += p;
+  });
+  const total = possible ? Math.round(earned/possible*100) : 0;
+  return { total, perCat };
+}
+
+function riskLevel(score){
+  if(score >= 90) return { label:'Excellent', cls:'risk-excellent', msg:'Low risk. You’re in the top tier — keep it that way.' };
+  if(score >= 70) return { label:'Good', cls:'risk-good', msg:'Moderate risk. A few gaps need attention before you scale.' };
+  if(score >= 50) return { label:'At Risk', cls:'risk-warn', msg:'High risk. Attackers will find these. Fix the critical items this week.' };
+  return { label:'Critical', cls:'risk-critical', msg:'Critical exposure. Do not launch or accept payments until the top findings are fixed.' };
+}
+
+/* ============================================================
+   REPORT
+   ============================================================ */
+function generateReport(){
+  const unanswered = TOTAL - Object.keys(state.answers).length;
+  if(unanswered > 0){
+    if(!confirm(`You have ${unanswered} unanswered checks. Unanswered items are treated as "N/A". Continue?`)) return;
+  }
+
+  // quota gate
+  if(!store.pro && scansLeft() <= 0){
+    openPro();
+    return;
+  }
+  if(!store.pro){ store.count++; saveStore(); }
+
+  const { total, perCat } = computeScore();
+  const risk = riskLevel(total);
+
+  // gauge
+  const circ = 439.8;
+  const offset = circ - (circ * total / 100);
+  const fill = document.getElementById('gaugeFill');
+  fill.style.strokeDashoffset = circ;
+  setTimeout(()=>{ fill.style.strokeDashoffset = offset; }, 60);
+  const color = total>=90?'#10b981':total>=70?'#06b6d4':total>=50?'#f59e0b':'#ef4444';
+  fill.style.stroke = color;
+
+  // score number animation
+  let n = 0;
+  const numEl = document.getElementById('scoreNum');
+  numEl.style.color = color;
+  const t = setInterval(()=>{
+    n += Math.max(1, Math.round(total/30));
+    if(n >= total){ n = total; clearInterval(t); }
+    numEl.textContent = n;
+  }, 30);
+
+  const badge = document.getElementById('riskBadge');
+  badge.className = 'risk-badge ' + risk.cls;
+  badge.textContent = risk.label;
+
+  document.getElementById('reportTitle').textContent = `Your Risk Score: ${total}/100`;
+  document.getElementById('reportSub').textContent = risk.msg;
+
+  // categories
+  document.getElementById('catGrid').innerHTML = CATEGORIES.map(cat=>{
+    const s = perCat[cat.id].score;
+    const col = s>=90?'#10b981':s>=70?'#06b6d4':s>=50?'#f59e0b':'#ef4444';
+    return `<div class="cat-card">
+      <div class="cat-top">
+        <span class="cat-name">${cat.icon} ${cat.name}</span>
+        <span class="cat-score" style="color:${col}">${s}%</span>
+      </div>
+      <div class="cat-bar"><span style="width:${s}%;background:${col}"></span></div>
+    </div>`;
+  }).join('');
+
+  // findings
+  const failed = ALL_CHECKS.filter(ch => state.answers[ch.id] === 'no');
+  const title = document.getElementById('findingsTitle');
+  const sub = document.getElementById('findingsSub');
+  const container = document.getElementById('findings');
+
+  if(failed.length === 0){
+    title.textContent = 'No Findings 🎉';
+    sub.textContent = 'Every check passed. Nice work.';
+    container.innerHTML = `<div class="perfect">You passed all answered checks. Re-run this audit after every major feature — AI apps drift fast.</div>`;
+  } else {
+    title.textContent = `${failed.length} Finding${failed.length>1?'s':''} & Fixes`;
+    sub.textContent = 'Ordered by severity. Click any card to see the exact remediation.';
+    failed.sort((a,b)=>b.w - a.w);
+    container.innerHTML = failed.map((ch,i)=>{
+      const sev = ch.w >= 8 ? 'critical' : ch.w >= 6 ? 'high' : 'low';
+      const sevLabel = ch.w >= 8 ? 'Critical' : ch.w >= 6 ? 'High' : ch.w >= 4 ? 'Medium' : 'Low';
+      return `<div class="finding ${sev}" onclick="toggleFinding(this)">
+        <div class="finding-head">
+          <div>
+            <div class="finding-title">${i+1}. ${ch.q}</div>
+            <div class="finding-meta">
+              <span class="sev sev-${ch.w>=8?'critical':ch.w>=6?'high':'medium'}">${sevLabel}</span>
+              <span class="finding-cat">${ch.catName}</span>
+            </div>
+          </div>
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="finding-body">
+          <div class="finding-inner">
+            <h4>Why it matters</h4>
+            <p>${ch.d}</p>
+            <h4>How to fix it</h4>
+            <p>${ch.fix}</p>
+            ${ch.code ? `<h4>Example</h4><code>${escapeHtml(ch.code)}</code>` : ''}
+            ${ch.ref ? `<a href="${ch.ref}" target="_blank" rel="noopener">Reference →</a>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('results').classList.add('show');
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+  toast(`Report generated · ${failed.length} finding${failed.length!==1?'s':''}`);
+}
+
+function toggleFinding(el){ el.classList.toggle('open'); }
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ============================================================
+   SUMMARY / RESET
+   ============================================================ */
+function copySummary(){
+  const { total } = computeScore();
+  const failed = ALL_CHECKS.filter(c => state.answers[c.id] === 'no');
+  let txt = `SecurAI Security Report\nRisk Score: ${total}/100 (${riskLevel(total).label})\nFindings: ${failed.length}\n\n`;
+  failed.sort((a,b)=>b.w-a.w).forEach((c,i)=>{
+    txt += `${i+1}. [${c.w>=8?'CRITICAL':c.w>=6?'HIGH':'MEDIUM'}] ${c.q}\n   Fix: ${c.fix}\n\n`;
+  });
+  navigator.clipboard.writeText(txt).then(()=>toast('Summary copied to clipboard'));
+}
+function resetAll(){
+  state = { answers:{}, currentCat:0 };
+  document.getElementById('results').classList.remove('show');
+  renderTabs(); renderChecks();
+  scrollToId('assessment');
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ============================================================
+   PRO MODAL
+   ============================================================ */
+function openPro(){ document.getElementById('proModal').classList.add('show'); }
+function closePro(){ document.getElementById('proModal').classList.remove('show'); }
+function mockUnlock(plan){
+  // NOTE: This is a placeholder. Wire this to a real payment (Getly / LemonSqueezy / Paddle)
+  // and set store.pro = true only after a verified webhook/license check.
+  store.pro = true; saveStore();
+  document.body.classList.add('is-pro');
+  closePro();
+  toast(`Demo: ${plan} unlocked locally`);
+  updateProgress();
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init(){
+  if(store.pro) document.body.classList.add('is-pro');
+  renderTabs();
+  renderChecks();
+  updateProgress();
+})();
+</script>
+</body>
+</html>
