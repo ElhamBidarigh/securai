@@ -5,6 +5,14 @@ get a risk score, and see exactly how to fix what's broken.
 
 👉 **[Try it live](https://elhambidarigh.github.io/securai/)**
 
+![SecurAI Audit Tool](screenshot-hero.png)
+
+![Security checklist](screenshot-checklist.png)
+
+![Security report](screenshot-report.png)
+
+![Security report](screenshot-report-2.png)
+
 ## Why
 
 AI coding tools (Cursor, Copilot, v0) generate working code — but not
