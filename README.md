@@ -39,6 +39,7 @@ Runs entirely in your browser. Nothing is uploaded. No account needed.
 | 🔬 Vuln Lab | Educational (PHP/MySQL) | [Repo](https://github.com/ElhamBidarigh/securAI-vuln-lab) |
 | 🔐 JWT Analyzer | CLI (Python) | [Repo](https://github.com/ElhamBidarigh/jwt-analyzer) |
 | 🔍 Active Scanner | Live URL scanner (PHP) | [Repo](https://github.com/ElhamBidarigh/securAI-active-scanner) |
+| 🔌 MCP Scanner | CLI (Python) | [Repo](https://github.com/ElhamBidarigh/securAI-mcp-scanner) |
 
 ## Related projects
 
@@ -48,6 +49,9 @@ Runs entirely in your browser. Nothing is uploaded. No account needed.
 - 🔍 **[SecurAI Active Scanner](https://github.com/ElhamBidarigh/securAI-active-scanner)** -
   A PHP tool that fetches a live URL and runs 11 non-destructive checks
   (headers, cookies, CORS, exposed .env / .git, open redirects, HTTP methods).
+- 🔌 **[SecurAI MCP Scanner](https://github.com/ElhamBidarigh/securAI-mcp-scanner)** -
+  A Python CLI that checks MCP server configs and tool descriptions for
+  prompt-injection, supply-chain and rug-pull risks.
 
 ## Pricing (coming soon)
 
