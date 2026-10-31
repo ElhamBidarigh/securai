@@ -5,13 +5,13 @@ get a risk score, and see exactly how to fix what's broken.
 
 👉 **[Try it live](https://elhambidarigh.github.io/securai/)**
 
-![SecurAI Audit Tool](screenshot-hero.png)
+![SecurAI Audit Tool](docs/screenshot-hero.png)
 
-![Security checklist](screenshot-checklist.png)
+![Security checklist](docs/screenshot-checklist.png)
 
-![Security report](screenshot-report.png)
+![Security report](docs/screenshot-report.png)
 
-![Security report](screenshot-report-2.png)
+![Security report](docs/screenshot-report-2.png)
 
 ## Why
 
@@ -40,6 +40,7 @@ Runs entirely in your browser. Nothing is uploaded. No account needed.
 | 🔐 JWT Analyzer | CLI (Python) | [Repo](https://github.com/ElhamBidarigh/jwt-analyzer) |
 | 🔍 Active Scanner | Live URL scanner (PHP) | [Repo](https://github.com/ElhamBidarigh/securAI-active-scanner) |
 | 🔌 MCP Scanner | CLI (Python) | [Repo](https://github.com/ElhamBidarigh/securAI-mcp-scanner) |
+| 🧪 Prompt Tester | CLI (Python) | [Repo](https://github.com/ElhamBidarigh/securAI-prompt-tester) |
 
 ## Related projects
 
@@ -52,6 +53,9 @@ Runs entirely in your browser. Nothing is uploaded. No account needed.
 - 🔌 **[SecurAI MCP Scanner](https://github.com/ElhamBidarigh/securAI-mcp-scanner)** -
   A Python CLI that checks MCP server configs and tool descriptions for
   prompt-injection, supply-chain and rug-pull risks.
+- 🧪 **[SecurAI Prompt Tester](https://github.com/ElhamBidarigh/securAI-prompt-tester)** -
+  A Python CLI that sends 21 safe prompt injection attacks to an LLM app
+  and writes a plain-language resistance report.
 
 ## Pricing (coming soon)
 

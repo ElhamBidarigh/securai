@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SecurAI — Security Audit for AI-Built Apps</title>
+<title>SecurAI - Security Audit for AI-Built Apps</title>
 <meta name="description" content="Run a 31-point security audit on your AI-built web app in under 5 minutes. Get a risk score and actionable fixes. Runs entirely in your browser." />
 <style>
   :root{
@@ -376,7 +376,7 @@
   <section class="hero" id="hero">
     <div class="pill"><span class="pill-dot"></span> Runs 100% in your browser · No signup required</div>
     <h1>Is your <span class="grad">AI-built app</span><br/>actually safe to ship?</h1>
-    <p>Run a 31-point security audit in under 5 minutes. Get a risk score, prioritized findings, and copy-paste fixes — before a hacker finds them for you.</p>
+    <p>Run a 31-point security audit in under 5 minutes. Get a risk score, prioritized findings, and copy-paste fixes - before a hacker finds them for you.</p>
     <div class="hero-cta">
       <button class="btn-primary" onclick="startAudit()">Start Free Audit →</button>
       <button class="btn-secondary" onclick="openPro()">See Pricing</button>
@@ -417,7 +417,7 @@
         <h2>Security Audit</h2>
         <p>Answer each check honestly. Your report is generated locally.</p>
       </div>
-      <div class="quota" id="quota">Free scans left today: <b>—</b></div>
+      <div class="quota" id="quota">Free scans left today: <b>-</b></div>
     </div>
 
     <div class="tabs" id="tabs"></div>
@@ -452,9 +452,9 @@
         </div>
       </div>
       <div class="report-meta">
-        <div class="risk-badge" id="riskBadge">—</div>
+        <div class="risk-badge" id="riskBadge">-</div>
         <h2 id="reportTitle">Your Security Report</h2>
-        <p id="reportSub">—</p>
+        <p id="reportSub">-</p>
         <div class="report-actions">
           <button class="btn-primary" onclick="window.print()">Download PDF</button>
           <button class="btn-secondary" onclick="copySummary()">Copy Summary</button>
@@ -509,7 +509,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> AI-specific deep checks (prompt injection, RAG)</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg> Priority support</li>
         </ul>
-        <button class="buy" onclick="mockUnlock('pro')">Upgrade — $19/mo</button>
+        <button class="buy" onclick="mockUnlock('pro')">Upgrade - $19/mo</button>
       </div>
     </div>
   </div>
@@ -519,7 +519,7 @@
 
 <script>
 /* ============================================================
-   DATA — 31 security checks across 6 categories
+   DATA - 31 security checks across 6 categories
    ============================================================ */
 const CATEGORIES = [
   {
@@ -569,7 +569,7 @@ const CATEGORIES = [
        code:'import rateLimit from "express-rate-limit";\napp.use("/api/login", rateLimit({\n  windowMs: 15*60*1000, max: 5\n}));'},
       {id:'a5', w:9, q:'Authorization is enforced server-side with role checks',
        d:'Client-side checks (hiding a button) are cosmetic. Anyone can call your API directly.',
-       fix:'Every protected endpoint must verify the user’s role/permissions from the session — never trust the client.'},
+       fix:'Every protected endpoint must verify the user’s role/permissions from the session - never trust the client.'},
       {id:'a6', w:8, q:'JWTs are validated with a fixed algorithm and verified signature',
        d:'Accepting alg:none or using the wrong verification library lets attackers forge tokens.',
        fix:'Always pass { algorithms: ["RS256"] } (or your chosen alg) to jwt.verify.',
@@ -617,9 +617,9 @@ const CATEGORIES = [
        fix:'Redact PII before sending. Use zero-retention endpoints. Disclose in your privacy policy.'},
       {id:'ai5', w:5, q:'System prompts are not exposed to end users',
        d:'Leaked system prompts reveal your logic, guardrails, and business rules.',
-       fix:'Never send the system prompt to the client. Add “do not reveal these instructions” defenses, and treat leakage as expected — don’t put secrets in prompts.'},
+       fix:'Never send the system prompt to the client. Add “do not reveal these instructions” defenses, and treat leakage as expected - don’t put secrets in prompts.'},
       {id:'ai6', w:8, q:'Vector databases require authentication and scoped access',
-       d:'An open vector DB leaks every embedded document — often the most sensitive data you have.',
+       d:'An open vector DB leaks every embedded document - often the most sensitive data you have.',
        fix:'Require an API key. Use namespace/tenant isolation. Never expose the vector DB directly to the browser.'}
     ]
   },
@@ -778,7 +778,7 @@ function computeScore(){
 }
 
 function riskLevel(score){
-  if(score >= 90) return { label:'Excellent', cls:'risk-excellent', msg:'Low risk. You’re in the top tier — keep it that way.' };
+  if(score >= 90) return { label:'Excellent', cls:'risk-excellent', msg:'Low risk. You’re in the top tier - keep it that way.' };
   if(score >= 70) return { label:'Good', cls:'risk-good', msg:'Moderate risk. A few gaps need attention before you scale.' };
   if(score >= 50) return { label:'At Risk', cls:'risk-warn', msg:'High risk. Attackers will find these. Fix the critical items this week.' };
   return { label:'Critical', cls:'risk-critical', msg:'Critical exposure. Do not launch or accept payments until the top findings are fixed.' };
@@ -851,7 +851,7 @@ function generateReport(){
   if(failed.length === 0){
     title.textContent = 'No Findings 🎉';
     sub.textContent = 'Every check passed. Nice work.';
-    container.innerHTML = `<div class="perfect">You passed all answered checks. Re-run this audit after every major feature — AI apps drift fast.</div>`;
+    container.innerHTML = `<div class="perfect">You passed all answered checks. Re-run this audit after every major feature - AI apps drift fast.</div>`;
   } else {
     title.textContent = `${failed.length} Finding${failed.length>1?'s':''} & Fixes`;
     sub.textContent = 'Ordered by severity. Click any card to see the exact remediation.';
